@@ -32,4 +32,4 @@ function copyDir(pathFrom, pathTo = '') {
 
 copyDir(fromCopyDir);
 
-module.exports = { copyDir };
+// module.exports = { copyDir };

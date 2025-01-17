@@ -1,6 +1,7 @@
-const { bundleCSS } = require('../05-merge-styles');
-const { copyDir } = require('../04-copy-directory');
+// const { bundleCSS } = require('../05-merge-styles');
+// const { copyDir } = require('../04-copy-directory');
 const fs = require('fs');
+const { mkdir, readdir, copyFile, stat } = require('fs');
 const path = require('path');
 
 const dataToPaths = {
@@ -109,3 +110,47 @@ const bundleProject = async ({
 };
 
 bundleProject(dataToPaths);
+
+function copyDir(pathFrom, pathTo = '') {
+  const copyDirTo = pathTo ? pathTo : pathFrom + '-copy';
+  mkdir(copyDirTo, { recursive: true }, (err) => {
+    if (err) console.log(err);
+
+    readdir(pathFrom, (err, files) => {
+      if (err) console.log(err);
+
+      files.forEach((file) => {
+        stat(path.join(pathFrom, file), (error, stats) => {
+          if (stats.isFile()) {
+            copyFile(
+              path.join(pathFrom, file),
+              path.join(copyDirTo, file),
+              (error) => {
+                if (error) console.log(error);
+              },
+            );
+          } else {
+            copyDir(path.join(pathFrom, file), path.join(copyDirTo, file));
+          }
+        });
+      });
+    });
+  });
+}
+
+function bundleCSS(pathToCSS, pathToDist) {
+  fs.readdir(pathToCSS, (err, files) => {
+    if (err) console.log(err);
+
+    const writeStream = fs.createWriteStream(pathToDist);
+    files.forEach((file) => {
+      const { ext } = path.parse(file);
+      if (ext === '.css') {
+        fs.readFile(path.join(pathToCSS, file), (err, info) => {
+          if (err) console.log(err);
+          writeStream.write(info.toString());
+        });
+      }
+    });
+  });
+}
