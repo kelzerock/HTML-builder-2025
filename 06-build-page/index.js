@@ -13,7 +13,70 @@ const dataToPaths = {
   pathToAssetsDist: path.join(__dirname, 'project-dist', 'assets'),
 };
 
-const bundleProject = ({
+// working function with callback
+// const bundleProject = ({
+//   pathToBundle,
+//   pathToTemplate,
+//   pathToComponents,
+//   pathToCSS,
+//   pathToCSSBundle,
+//   pathToAssets,
+//   pathToAssetsDist,
+// }) => {
+//   const handleError = (err) => {
+//     if (err) console.log(err);
+//   };
+
+//   fs.mkdir(pathToBundle, { recursive: true }, (err) => {
+//     handleError(err);
+//     fs.readFile(pathToTemplate, (err, data) => {
+//       handleError(err);
+//       let html = data.toString();
+//       fs.readdir(pathToComponents, (err, files) => {
+//         handleError(err);
+//         files.forEach((file, index) => {
+//           if (path.extname(file) === '.html') {
+//             fs.readFile(
+//               path.join(pathToComponents, file),
+//               'utf-8',
+//               (err, dataTemplate) => {
+//                 handleError(err);
+//                 const name = path.parse(path.join(pathToComponents, file)).name;
+//                 html = html.replace(`{{${name}}}`, dataTemplate);
+//                 if (index === files.length - 1) {
+//                   fs.writeFile(
+//                     path.join(pathToBundle, 'index.html'),
+//                     html,
+//                     'utf-8',
+//                     () => {},
+//                   );
+//                 }
+//               },
+//             );
+//           }
+//         });
+//       });
+//     });
+//   });
+
+//   bundleCSS(pathToCSS, pathToCSSBundle);
+//   copyDir(pathToAssets, pathToAssetsDist);
+// };
+
+/**
+ * Bundle template to one index.html file and compress styles to one file
+ * @param {Object} paths - object with paths to bundle and src
+ * @param {string} paths.pathToBundle - path to bundle directory
+ * @param {string} paths.pathToTemplate - path to template directory
+ * @param {string} paths.pathToComponents - path to components directory
+ * @param {string} paths.pathToCSS - path to css directory (only *.css files)
+ * @param {string} paths.pathToCSSBundle- path to bundle directory with final name for bundle css file
+ * @param {string} paths.pathToAssets - path to assets directory
+ * @param {string} paths.pathToAssetsDist - path to assets directory in bundle
+ * @returns void
+ */
+
+const bundleProject = async ({
   pathToBundle,
   pathToTemplate,
   pathToComponents,
@@ -22,42 +85,25 @@ const bundleProject = ({
   pathToAssets,
   pathToAssetsDist,
 }) => {
-  const handleError = (err) => {
-    if (err) console.log(err);
-  };
+  await fs.promises.mkdir(pathToBundle, { recursive: true });
+  let html = await fs.promises.readFile(pathToTemplate, 'utf-8');
 
-  fs.mkdir(pathToBundle, { recursive: true }, (err) => {
-    handleError(err);
-    fs.readFile(pathToTemplate, (err, data) => {
-      handleError(err);
-      let html = data.toString();
-      fs.readdir(pathToComponents, (err, files) => {
-        handleError(err);
-        files.forEach((file, index) => {
-          if (path.extname(file) === '.html') {
-            fs.readFile(
-              path.join(pathToComponents, file),
-              'utf-8',
-              (err, dataTemplate) => {
-                handleError(err);
-                const name = path.parse(path.join(pathToComponents, file)).name;
-                html = html.replace(`{{${name}}}`, dataTemplate);
-                if (index === files.length - 1) {
-                  fs.writeFile(
-                    path.join(pathToBundle, 'index.html'),
-                    html,
-                    'utf-8',
-                    () => {},
-                  );
-                }
-              },
-            );
-          }
-        });
-      });
-    });
-  });
-
+  const filesArr = await fs.promises.readdir(pathToComponents);
+  for (const file of filesArr) {
+    const { name, ext } = path.parse(path.join(pathToComponents, file));
+    if (ext === '.html') {
+      const dataTemplate = await fs.promises.readFile(
+        path.join(pathToComponents, file),
+        'utf-8',
+      );
+      html = html.replace(`{{${name}}}`, dataTemplate);
+    }
+  }
+  await fs.promises.writeFile(
+    path.join(pathToBundle, 'index.html'),
+    html,
+    'utf-8',
+  );
   bundleCSS(pathToCSS, pathToCSSBundle);
   copyDir(pathToAssets, pathToAssetsDist);
 };
