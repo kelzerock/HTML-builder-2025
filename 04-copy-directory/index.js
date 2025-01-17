@@ -3,6 +3,11 @@ const path = require('path');
 
 const fromCopyDir = path.join(__dirname, '/files');
 
+/**
+ * Copies the contents of a directory from pathFrom to pathTo.
+ * @param {string} pathFrom - Path to the directory to copy from.
+ * @param {string} [pathTo] - Path to the directory to copy to. Defaults to <code>pathFrom + '-copy'</code>.
+ */
 function copyDir(pathFrom, pathTo = '') {
   const copyDirTo = pathTo ? pathTo : pathFrom + '-copy';
   mkdir(copyDirTo, { recursive: true }, (err) => {
