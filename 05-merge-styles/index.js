@@ -22,6 +22,7 @@ const bundleCSS = (pathToCSS, pathToDist) => {
 };
 
 bundleCSS(pathToCSS, pathToDist);
+module.exports = { bundleCSS };
 
 // code for testing test-files
 // just uncommit this
