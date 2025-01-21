@@ -113,7 +113,20 @@ bundleProject(dataToPaths);
 
 function copyDir(pathFrom, pathTo = '') {
   const copyDirTo = pathTo ? pathTo : pathFrom + '-copy';
-  mkdir(copyDirTo, { recursive: true }, (err) => {
+  access(copyDirTo, (err) => {
+    if (err) {
+      copyFilesTo(copyDirTo, pathFrom);
+    } else {
+      rm(copyDirTo, { recursive: true }, (err) => {
+        if (err) console.log(err);
+        copyFilesTo(copyDirTo, pathFrom);
+      });
+    }
+  });
+}
+
+function copyFilesTo(copyTo, pathFrom) {
+  mkdir(copyTo, { recursive: true }, (err) => {
     if (err) console.log(err);
 
     readdir(pathFrom, (err, files) => {
@@ -124,13 +137,13 @@ function copyDir(pathFrom, pathTo = '') {
           if (stats.isFile()) {
             copyFile(
               path.join(pathFrom, file),
-              path.join(copyDirTo, file),
+              path.join(copyTo, file),
               (error) => {
                 if (error) console.log(error);
               },
             );
           } else {
-            copyDir(path.join(pathFrom, file), path.join(copyDirTo, file));
+            copyDir(path.join(pathFrom, file), path.join(copyTo, file));
           }
         });
       });
