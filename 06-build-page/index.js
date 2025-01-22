@@ -1,7 +1,7 @@
 // const { bundleCSS } = require('../05-merge-styles');
 // const { copyDir } = require('../04-copy-directory');
 const fs = require('fs');
-const { mkdir, readdir, copyFile, stat } = require('fs');
+const { mkdir, readdir, copyFile, stat, access, rm } = require('fs');
 const path = require('path');
 
 const dataToPaths = {
